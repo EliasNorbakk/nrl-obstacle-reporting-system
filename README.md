@@ -63,3 +63,16 @@ Scenario 3
 # Resultater
 
 Etter å ha testet de tre scenarioene så er resultatet at alle på gruppen fikk prosjektet til å kjøre og fikk fullført hver sin rapport.
+
+
+## Team
+
+Semester-prosjekt i IS-200, IS-201 og IS-202 utviklet av studentgrupp på 6 studenter ved Universitetet i Agder.
+
+
+- Daniel Tallaksen — [@danieltallaksen](https://github.com/danieltallaksen)
+- Elias Lyng — [@akaLyng](https://github.com/akaLyng)
+- Elias Norbakk — [@EliasNorbakk](https://github.com/EliasNorbakk)
+- Henos Habtab Weldigirgos
+- Oskar Moberg Kirkbride — [@oskarmk24](https://github.com/oskarmk24)
+- Truls Reime — [@TrulsReime](https://github.com/TrulsReime)
