@@ -1,0 +1,133 @@
+﻿@model WebApplication1.Models.ObstacleData
+
+@{
+    ViewData["Title"] = "Register Obstacle";
+}
+
+<section class="mx-auto max-w-2xl">
+    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-6">
+        <header class="mb-6">
+            <h1 class="text-2xl font-semibold">Obstacle Registration Form</h1>
+            <p class="text-gray-600 mt-1">Please register an obstacle</p>
+        </header>
+
+        <!-- Skjema for å registrere hinder -->
+        <form asp-action="DataForm" method="post" class="space-y-5">
+            <!-- Viser feilmeldinger hvis valideringen feiler -->
+            <div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
+
+            <!-- Skjult input som lagrer posisjon fra kartet, trenger denne for at serveren skal vite hvor brukeren trykket på kartet -->
+            <input type="hidden" asp-for="ObstacleLocation" id="ObstacleLocation" />
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <!-- Navn på hinder -->
+                <div class="sm:col-span-2">
+                    <label asp-for="ObstacleName" class="block text-sm font-medium text-gray-800 mb-1">Obstacle Name</label>
+                    <input asp-for="ObstacleName"
+                           class="block w-full rounded-lg border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 px-3 py-2"
+                           placeholder="e.g., Wall, Ramp" />
+                    <span asp-validation-for="ObstacleName" class="text-sm text-red-600"></span>
+                </div>
+
+                <!-- Høyde på hinder -->
+                <div>
+                    <label asp-for="ObstacleHeight" class="block text-sm font-medium text-gray-800 mb-1">Obstacle Height (meters)</label>
+                    <input asp-for="ObstacleHeight" type="number"
+                           class="block w-full rounded-md border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 px-3 py-2"
+                           placeholder="e.g., 2.5" />
+                    <span asp-validation-for="ObstacleHeight" class="text-sm text-red-600"></span>
+                </div>
+            </div>
+
+            <!-- Beskrivelse av hinder -->
+            <div class="sm:col-span-2">
+                <label asp-for="ObstacleDescription" class="block text-sm font-medium text-gray-800 mb-1">Obstacle Description</label>
+                <textarea asp-for="ObstacleDescription" rows="4"
+                          class="block w-full rounded-lg border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 px-3 py-2"
+                          placeholder="Describe the obstacle, materials, location, etc."></textarea>
+                <span asp-validation-for="ObstacleDescription" class="text-sm text-red-600"></span>
+            </div>
+
+            <!-- Knapp for å sende inn skjemaet -->
+            <div class="pt-2">
+                <button type="submit"
+                        class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    Submit Data
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+
+<!-- Kartseksjon for å velge posisjon -->
+<section class="mx-auto max-w-2xl pt-6">
+    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-6">
+        <header class="mb-6">
+            <h1 class="text-2xl font-semibold">Map</h1>
+        </header>
+
+        <!-- Selve kartet -->
+        <div id="map"></div>
+
+        <!-- Hint-tekst som oppdateres når bruker klikker i kartet -->
+        <div id="coordsHint" class="mt-2 text-sm text-gray-600">Click the map to drop a pin.</div>
+    </div>
+</section>
+
+<!-- Størrelse på kartet -->
+<style>
+    #map {
+        height: 400px;
+    }
+</style>
+
+@section Scripts {
+    <!-- Script for klient-side validering -->
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Starter kartet og setter standardvisning (Bergen)
+        var map = L.map('map').setView([60.39, 5.32], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Holder referanse til markøren + skjult input
+        var marker = null;
+        var hidden = document.getElementById('ObstacleLocation');
+        var hint = document.getElementById('coordsHint');
+
+        // Lagrer posisjon i JSON-format i skjult input
+        function setLocation(lat, lng) {
+            var payload = {
+                type: "Point",
+                coordinates: [Number(lng.toFixed(6)), Number(lat.toFixed(6))]
+            };
+            hidden.value = JSON.stringify(payload);
+            if (hint) {
+                hint.textContent = "Selected: lat " + lat.toFixed(6) + ", lng " + lng.toFixed(6);
+            }
+        }
+
+        // Plasserer eller flytter markør på kartet
+        function placeOrMoveMarker(latlng) {
+            if (!marker) {
+                marker = L.marker(latlng, { draggable: true }).addTo(map);
+                marker.on('dragend', function (e) {
+                    var p = e.target.getLatLng();
+                    setLocation(p.lat, p.lng);
+                });
+            } else {
+                marker.setLatLng(latlng);
+            }
+            setLocation(latlng.lat, latlng.lng);
+        }
+
+        // Når brukeren klikker på kartet, plasser markør og oppdater skjult input
+        map.on('click', function (e) {
+            placeOrMoveMarker(e.latlng);
+        });
+    </script>
+}

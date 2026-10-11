@@ -1,0 +1,45 @@
+version: "3.9"
+# oppretter to docker containere i et internt nettverk.
+services:
+  webapplication1:
+    build:
+      context: .
+      dockerfile: WebApplication1/Dockerfile
+    container_name: obstacle-web
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "5173:8080"  # appen åpnes på http://localhost:5173
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # Overstyrer appsettings.json
+      ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=obstacledb;User Id=appuser;Password=test123;"
+    networks: [appnet]
+
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root123
+      MARIADB_DATABASE: obstacledb
+      MARIADB_USER: appuser
+      MARIADB_PASSWORD: test123
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks: [appnet]
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -uroot -p$${MARIADB_ROOT_PASSWORD} --host=127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  appnet: {}   # internt nettverk
+
+volumes:
+  dbdata:

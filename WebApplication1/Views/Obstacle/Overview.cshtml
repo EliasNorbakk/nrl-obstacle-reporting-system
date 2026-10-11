@@ -1,0 +1,75 @@
+﻿@model WebApplication1.Models.ObstacleData
+
+@{
+    ViewData["Title"] = "Overview";
+}
+
+<section class="mx-auto max-w-2xl">
+    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-6 space-y-4">
+        <header>
+            <h1 class="text-2xl font-semibold">Overview</h1>
+            <p class="text-gray-600 mt-1">Thank you for registering an obstacle</p>
+        </header>
+
+        <!-- Viser dataene brukeren har fylt ut i skjemaet -->
+        <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Navn på hinder -->
+            <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-600">Obstacle Name</dt>
+                <dd class="mt-1 text-base text-gray-900 break-words">@Model.ObstacleName</dd>
+            </div>
+
+            <!-- Høyde på hinder -->
+            <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-600">Height</dt>
+                <dd class="mt-1 text-base text-gray-900">@Model.ObstacleHeight</dd>
+            </div>
+
+            <!-- Beskrivelse av hinder -->
+            <div class="sm:col-span-1">
+                <dt class="text-sm font-medium text-gray-600">Description</dt>
+                <dd class="mt-1 text-base text-gray-900 break-words sm:col-span-3">@Model.ObstacleDescription</dd>
+            </div>
+        </dl>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ObstacleLocation))
+           {
+            <div class="mt-4 space-y-2">
+                <p><strong>Location:</strong> @Model.ObstacleLocation</p>
+                <div id="map2" style="height: 320px;" class="rounded-xl ring-1 ring-gray-200"></div>
+            </div>
+
+            <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        
+        <script>
+        // Dersom lokasjoninfo ikke kan hentes vil de vise error melding.
+
+            try
+            {
+                var geo = JSON.parse(@Html.Raw(Json.Serialize(Model.ObstacleLocation)));
+                var lng = geo.coordinates[0];
+                var lat = geo.coordinates[1];
+
+                var map2 = L.map('map2').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; OpenStreetMap'}).addTo(map2);
+                L.marker([lat, lng]).addTo(map2);
+            }
+
+            catch (error)
+            {
+                console.warn('Could not parse location JSON', error);
+            }
+
+        </script>
+}
+
+        <!-- Tilbake-knapp som sender brukeren til startsiden -->
+        <div class="pt-2">
+            <a asp-controller="Home" asp-action="Index"
+               class="inline-flex items-center rounded-lg px-4 py-2 ring-1 ring-gray-300 hover:bg-gray-50">
+                Back to Home
+            </a>
+        </div>
+    </div>
+</section>
